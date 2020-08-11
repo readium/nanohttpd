@@ -267,9 +267,10 @@ public class Response implements Closeable {
             pw.flush();
             sendBodyWithCorrectTransferAndEncoding(outputStream, pending);
             outputStream.flush();
-            NanoHTTPD.safeClose(this.data);
         } catch (IOException ioe) {
             NanoHTTPD.LOG.log(Level.SEVERE, "Could not send response to the client", ioe);
+        } finally {
+            NanoHTTPD.safeClose(this.data);
         }
     }
 
@@ -297,13 +298,7 @@ public class Response implements Closeable {
         if (this.requestMethod != Method.HEAD && this.chunkedTransfer) {
             ChunkedOutputStream chunkedOutputStream = new ChunkedOutputStream(outputStream);
             sendBodyWithCorrectEncoding(chunkedOutputStream, -1);
-            try {
-                chunkedOutputStream.finish();
-            } catch (Exception e) {
-                if(this.data != null) {
-                    this.data.close();
-                }
-            }
+            chunkedOutputStream.finish();
         } else {
             sendBodyWithCorrectEncoding(outputStream, pending);
         }
@@ -311,18 +306,9 @@ public class Response implements Closeable {
 
     private void sendBodyWithCorrectEncoding(OutputStream outputStream, long pending) throws IOException {
         if (useGzipWhenAccepted()) {
-            GZIPOutputStream gzipOutputStream = null;
-            try {
-                gzipOutputStream = new GZIPOutputStream(outputStream);
-            } catch (Exception e) {
-                if(this.data != null) {
-                    this.data.close();
-                }
-            }
-            if (gzipOutputStream != null) {
-                sendBody(gzipOutputStream, -1);
-                gzipOutputStream.finish();
-            }
+            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
+            sendBody(gzipOutputStream, -1);
+            gzipOutputStream.finish();
         } else {
             sendBody(outputStream, pending);
         }
@@ -351,13 +337,7 @@ public class Response implements Closeable {
             if (read <= 0) {
                 break;
             }
-            try {
-                outputStream.write(buff, 0, read);
-            } catch (Exception e) {
-                if(this.data != null) {
-                    this.data.close();
-                }
-            }
+            outputStream.write(buff, 0, read);
             if (!sendEverything) {
                 pending -= read;
             }
