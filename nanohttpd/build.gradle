@@ -1,11 +1,9 @@
 description = 'NanoHttpd-Core'
 
 dependencies {
-	implementation "org.apache.httpcomponents:httpclient:4.2.5"
-	implementation "org.apache.httpcomponents:httpmime:4.2.5"
+	testImplementation "org.apache.httpcomponents:httpclient:4.2.5"
+	testImplementation "org.apache.httpcomponents:httpmime:4.2.5"
 	testImplementation "junit:junit:4.13.2"
-	testImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.2.5'
-	testImplementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.2.5'
 }
 
 sourceSets {
